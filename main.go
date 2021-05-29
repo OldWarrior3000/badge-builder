@@ -3,11 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"os"
-
-	"github.com/gorilla/mux"
 )
 
 var Region = ""
@@ -18,9 +16,11 @@ func retrieveImages(w http.ResponseWriter, r *http.Request) {
 	repositoryId := vars["repositoryName"]
 
 	fmt.Println("Endpoint Hit: retrieveImages")
-	var imageIds = GetSortedImageIds(Region, RegistryId, repositoryId)
+	imageIds := GetSortedImageIds(Region, RegistryId, repositoryId)
 
-	json.NewEncoder(w).Encode(imageIds)
+	if imageIds != nil {
+		_ = json.NewEncoder(w).Encode(imageIds[len(imageIds)-1])
+	}
 }
 
 func handleRequests() {
@@ -34,7 +34,6 @@ func main() {
 	region, registryId, err := LoadConfiguration()
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(-1)
 	}
 
 	RegistryId = *registryId
